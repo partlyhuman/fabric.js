@@ -439,7 +439,7 @@
      * @param {Number} left Left position of text
      * @param {Number} top Top position of text
      */
-    _renderChars: function(method, ctx, chars, left, top) {
+    _renderChars: function(method, ctx, chars, left, top, maxwidth) {
       // remove Text word from method var
       var shortM = method.slice(0, -4);
       if (this[shortM].toLive) {
@@ -450,7 +450,12 @@
         left -= offsetX;
         top -= offsetY;
       }
-      ctx[method](chars, left, top);
+      if (maxwidth > 0) {
+        ctx[method](chars, left, top, maxwidth);
+      }
+      else {
+        ctx[method](chars, left, top);
+      }
       this[shortM].toLive && ctx.restore();
     },
 
@@ -551,11 +556,15 @@
           wordsWidth = ctx.measureText(line).width,
           widthDiff = this.fixedLineWidth - wordsWidth,
           numSpaces = letters.length - 1,
-          spaceWidth = Math.max(widthDiff/numSpaces, 0),
+          spaceWidth = widthDiff/numSpaces,
           leftOffset = -this.fixedLineWidth/2;
-        for (var i = 0, len = letters.length; i < len; i++) {
-          this._renderChars(method, ctx, letters[i], left + leftOffset, top, lineIndex);
-          leftOffset += ctx.measureText(letters[i]).width + spaceWidth;
+        if (spaceWidth > 0) {
+          for (var i = 0, len = letters.length; i < len; i++) {
+            this._renderChars(method, ctx, letters[i], left + leftOffset, top, lineIndex);
+            leftOffset += ctx.measureText(letters[i]).width + spaceWidth;
+          }
+        } else {
+          this._renderChars(method, ctx, line, left + leftOffset, top, lineIndex, this.fixedLineWidth);
         }
 
       }

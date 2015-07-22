@@ -535,6 +535,9 @@
       }
 
       for (var i = 0, len = _chars.length; i < len; i++) {
+        if (this.maxLength > 0 && this.text.length >= this.maxLength) {
+          break;
+        }
         if (useCopiedStyle) {
           style = fabric.copiedTextStyle[i];
         }

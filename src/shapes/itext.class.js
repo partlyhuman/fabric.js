@@ -581,10 +581,10 @@
      * @param {String} method
      * @param {CanvasRenderingContext2D} ctx Context to render on
      */
-    _renderChars: function(method, ctx, line, left, top, lineIndex) {
+    _renderChars: function(method, ctx, line, left, top, lineIndex, maxwidth) {
 
       if (this.isEmptyStyles()) {
-        return this._renderCharsFast(method, ctx, line, left, top);
+        return this._renderCharsFast(method, ctx, line, left, top, maxwidth);
       }
 
       this.skipTextAlign = true;
@@ -629,14 +629,14 @@
      * @param {Number} left Left coordinate
      * @param {Number} top Top coordinate
      */
-    _renderCharsFast: function(method, ctx, line, left, top) {
+    _renderCharsFast: function(method, ctx, line, left, top, maxwidth) {
       this.skipTextAlign = false;
 
       if (method === 'fillText' && this.fill) {
-        this.callSuper('_renderChars', method, ctx, line, left, top);
+        this.callSuper('_renderChars', method, ctx, line, left, top, maxwidth);
       }
       if (method === 'strokeText' && ((this.stroke && this.strokeWidth > 0) || this.skipFillStrokeCheck)) {
-        this.callSuper('_renderChars', method, ctx, line, left, top);
+        this.callSuper('_renderChars', method, ctx, line, left, top, maxwidth);
       }
     },
 
