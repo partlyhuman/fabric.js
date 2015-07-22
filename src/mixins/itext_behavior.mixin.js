@@ -550,6 +550,12 @@
      */
     insertChar: function(_char, skipUpdate, styleObject) {
       var isEndOfLine = this.text[this.selectionStart] === '\n';
+      if (this.multiline === false && _char === '\n') {
+        return;
+      }
+      if (this.capitalize === true) {
+        _char = _char.toUpperCase();
+      }
       this.text = this.text.slice(0, this.selectionStart) +
         _char + this.text.slice(this.selectionEnd);
       this._textLines = this._splitTextIntoLines();

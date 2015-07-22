@@ -110,7 +110,7 @@
      * Height of cursor (in percent 0..1)
      * @type Number
      */
-    cursorHeightPercent: 0.75,
+    cursorHeightPercent: 1,
 
     /**
      * Color of default cursor (when not overwritten by character style)
@@ -147,6 +147,10 @@
      * @default
      */
     caching: true,
+
+    // REB
+    multiline: true,
+    capitalize: false,
 
     /**
      * @private

@@ -389,7 +389,7 @@
      */
     _translateForTextAlign: function(ctx) {
       if (this.textAlign !== 'left' && this.textAlign !== 'justify') {
-        ctx.translate(this.textAlign === 'center' ? (this.width / 2) : this.width, 0);
+        ctx.translate((this.textAlign === 'center' || this.textAlign === 'stretch') ? (this.width / 2) : this.width, 0);
       }
     },
 
@@ -456,46 +456,6 @@
 
     /**
      * @private
-     * @param {String} method Method name ("fillText" or "strokeText")
-     * @param {CanvasRenderingContext2D} ctx Context to render on
-     * @param {String} line Text to render
-     * @param {Number} left Left position of text
-     * @param {Number} top Top position of text
-     * @param {Number} lineIndex Index of a line in a text
-     */
-    _renderTextLine: function(method, ctx, line, left, top, lineIndex) {
-      // lift the line by quarter of fontSize
-      top -= this.fontSize * this._fontSizeFraction;
-
-      // short-circuit
-      if (this.textAlign !== 'justify') {
-        this._renderChars(method, ctx, line, left, top, lineIndex);
-        return;
-      }
-
-      var lineWidth = this._getLineWidth(ctx, lineIndex),
-          totalWidth = this.width;
-      if (totalWidth >= lineWidth) {
-        // stretch the line
-        var words = line.split(/\s+/),
-            wordsWidth = this._getWidthOfWords(ctx, line, lineIndex),
-            widthDiff = totalWidth - wordsWidth,
-            numSpaces = words.length - 1,
-            spaceWidth = widthDiff / numSpaces,
-            leftOffset = 0;
-
-        for (var i = 0, len = words.length; i < len; i++) {
-          this._renderChars(method, ctx, words[i], left + leftOffset, top, lineIndex);
-          leftOffset += ctx.measureText(words[i]).width + spaceWidth;
-        }
-      }
-      else {
-        this._renderChars(method, ctx, line, left, top, lineIndex);
-      }
-    },
-
-    /**
-     * @private
      * @param {CanvasRenderingContext2D} ctx Context to render on
      * @param {Number} line
      */
@@ -543,6 +503,64 @@
           i
         );
         lineHeights += heightOfLine;
+      }
+    },
+
+    /**
+     * @private
+     * @param {String} method Method name ("fillText" or "strokeText")
+     * @param {CanvasRenderingContext2D} ctx Context to render on
+     * @param {String} line Text to render
+     * @param {Number} left Left position of text
+     * @param {Number} top Top position of text
+     * @param {Number} lineIndex Index of a line in a text
+     */
+    _renderTextLine: function(method, ctx, line, left, top, lineIndex) {
+      // lift the line by quarter of fontSize
+      top -= this.fontSize * this._fontSizeFraction;
+
+      // short-circuit
+      if (this.textAlign !== 'justify' && this.textAlign !== 'stretch') {
+        return;
+      }
+
+      if (this.textAlign == 'justify') {
+        var lineWidth = this._getLineWidth(ctx, lineIndex),
+          totalWidth = this.width;
+        var shouldStretch = (this.textAlign == 'justify' && totalWidth >= lineWidth) || (this.textAlign == 'stretch' && this.fixedLineWidth > 0)
+        if (totalWidth >= lineWidth) {
+          // stretch the line
+          var words = line.split(/\s+/),
+            wordsWidth = this._getWidthOfWords(ctx, line, lineIndex),
+            widthDiff = totalWidth - wordsWidth,
+            numSpaces = words.length - 1,
+            spaceWidth = widthDiff / numSpaces,
+            leftOffset = 0;
+
+          for (var i = 0, len = words.length; i < len; i++) {
+            this._renderChars(method, ctx, words[i], left + leftOffset, top, lineIndex);
+            leftOffset += ctx.measureText(words[i]).width + spaceWidth;
+          }
+        }
+        else {
+          this._renderChars(method, ctx, line, left, top, lineIndex);
+        }
+      }
+      else if (this.textAlign == 'stretch' && this.fixedLineWidth > 0) {
+        var letters = line.split(''),
+          wordsWidth = ctx.measureText(line).width,
+          widthDiff = this.fixedLineWidth - wordsWidth,
+          numSpaces = letters.length - 1,
+          spaceWidth = Math.max(widthDiff/numSpaces, 0),
+          leftOffset = -this.fixedLineWidth/2;
+        for (var i = 0, len = letters.length; i < len; i++) {
+          this._renderChars(method, ctx, letters[i], left + leftOffset, top, lineIndex);
+          leftOffset += ctx.measureText(letters[i]).width + spaceWidth;
+        }
+
+      }
+      else {
+        this._renderChars(method, ctx, line, left, top, lineIndex);
       }
     },
 
@@ -664,6 +682,9 @@
      * @return {Number} Line left offset
      */
     _getLineLeftOffset: function(lineWidth) {
+      if (this.textAlign === 'stretch') {
+        return (this.fixedLineWidth - lineWidth) / 2;
+      }
       if (this.textAlign === 'center') {
         return (this.width - lineWidth) / 2;
       }
@@ -709,7 +730,7 @@
       if (this.__lineWidths[lineIndex]) {
         return this.__lineWidths[lineIndex];
       }
-      this.__lineWidths[lineIndex] = ctx.measureText(this._textLines[lineIndex]).width;
+      this.__lineWidths[lineIndex] = (this.fixedLineWidth > 0)? this.fixedLineWidth : ctx.measureText(this._textLines[lineIndex]).width;
       return this.__lineWidths[lineIndex];
     },
 
