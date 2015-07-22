@@ -1,6 +1,8 @@
 .DS_Store
 *.iml
+/.idea/
 /node_modules/
 /npm-debug.log
 before_commit
 /coverage/
+/dist/

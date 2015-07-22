@@ -107,6 +107,12 @@
     cursorWidth: 2,
 
     /**
+     * Height of cursor (in percent 0..1)
+     * @type Number
+     */
+    cursorHeightPercent: 0.75,
+
+    /**
      * Color of default cursor (when not overwritten by character style)
      * @type String
      * @default
@@ -509,9 +515,11 @@
 
       ctx.fillRect(
         boundaries.left + leftOffset,
-        boundaries.top + boundaries.topOffset,
+        boundaries.top + boundaries.topOffset + (1-this.cursorHeightPercent)/2 * charHeight,
         this.cursorWidth / this.scaleX,
-        charHeight);
+        //charHeight
+        this.cursorHeightPercent * charHeight
+      );
 
     },
 
