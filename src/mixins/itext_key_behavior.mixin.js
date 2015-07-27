@@ -10,8 +10,9 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
     if (this.maxLength > 0) {
       this.hiddenTextarea.setAttribute('maxlength', this.maxLength);
     }
-    this.hiddenTextarea.style.cssText = 'position: fixed; bottom: 20px; left: 0px; opacity: 0;'
-                                        + ' width: 0px; height: 0px; z-index: -999;';
+    this.hiddenTextarea.className = 'fabric-hidden-input';
+
+    this.hiddenTextarea.style.cssText = 'opacity: 0; width: 0; height: 0; z-index: -999;';
     fabric.document.body.appendChild(this.hiddenTextarea);
 
     fabric.util.addListener(this.hiddenTextarea, 'keydown', this.onKeyDown.bind(this));
